@@ -213,12 +213,3 @@ dotnet ef database update
 4. Push to branch (`git push origin feature/AmazingFeature`)
 5. Tạo Pull Request
 
-## 📄 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
-
-## 📞 Liên hệ
-
-- **Developer**: Lê Văn Thái
-- **Email**: levanthai113@gmail.com
-- **Project Link**: [https://github.com/yourusername/SystemQuiz](https://github.com/yourusername/SystemQuiz)
