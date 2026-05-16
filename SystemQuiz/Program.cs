@@ -39,6 +39,10 @@ namespace SystemQuiz
             builder.Services.AddScoped<SystemQuiz.Services.IQuestionService, SystemQuiz.Services.QuestionService>();
             builder.Services.AddScoped<SystemQuiz.Services.IQuizService, SystemQuiz.Services.QuizService>();
 
+            // Add Health Checks
+            builder.Services.AddHealthChecks()
+                .AddCheck("api", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy("API is running"));
+
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
             {
@@ -94,6 +98,9 @@ namespace SystemQuiz
 
 
             app.MapControllers();
+
+            // Map Health Check endpoints
+            app.MapHealthChecks("/api/health");
 
             app.Run();
         }
