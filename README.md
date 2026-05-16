@@ -52,6 +52,29 @@ dotnet tool install --global dotnet-ef
 dotnet ef database update
 ```
 
+### 4. Cập nhật Database (Migrations)
+
+Hệ thống có sự thay đổi cấu trúc bảng, ví dụ như thêm các cột thống kê người dùng (`AddUserStats`), bạn cần chạy lệnh migration để cập nhật database.
+
+**Bảng `Users` vừa được cập nhật thêm 5 cột sau:**
+- `TotalXP`: Tổng điểm kinh nghiệm của người dùng.
+- `CurrentStreak`: Số ngày học liên tiếp.
+- `CompletedQuizzes`: Tổng số bài quiz đã hoàn thành.
+- `GlobalRank`: Thứ hạng toàn cầu của người dùng.
+- `LastQuizDate`: Thời gian làm bài quiz gần nhất.
+
+**Cách thực hiện (Nếu chưa được cập nhật):**
+1. Mở terminal tại thư mục `SystemQuiz` (chứa backend).
+2. Chạy lệnh tạo migration (nếu bạn là người thay đổi code):
+   ```bash
+   dotnet ef migrations add AddUserStats
+   ```
+3. Chạy lệnh cập nhật database:
+   ```bash
+   dotnet ef database update
+   ```
+4. Nếu kết quả báo `✅ Migration thành công!` nghĩa là Database của bạn đã sẵn sàng.
+
 ## 🚀 Cách chạy ứng dụng
 
 ### 1. Chạy Backend (API)
