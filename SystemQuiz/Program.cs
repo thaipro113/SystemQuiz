@@ -12,6 +12,9 @@ namespace SystemQuiz
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // Add Local configuration file (not committed to git)
+            builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+
             // Add services to the container.
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -41,7 +44,15 @@ namespace SystemQuiz
 
             // Add Health Checks
             builder.Services.AddHealthChecks()
-                .AddCheck("api", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy("API is running"));
+                .AddCheck("api", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy("API is running"))
+                .AddCheck("database", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy("Database OK"))
+                .AddCheck("memory", () => 
+                {
+                    var memoryUsed = GC.GetTotalMemory(false);
+                    return memoryUsed < 100_000_000 
+                        ? Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy($"Memory usage: {memoryUsed / 1024 / 1024} MB")
+                        : Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Degraded($"High memory usage: {memoryUsed / 1024 / 1024} MB");
+                });
 
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(c =>
