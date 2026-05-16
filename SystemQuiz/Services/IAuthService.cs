@@ -6,5 +6,6 @@ namespace SystemQuiz.Services
     {
         Task<AuthResponseDto> LoginAsync(LoginDto loginDto);
         Task<bool> RegisterAsync(RegisterDto registerDto);
+        Task<UserStatsDto> GetUserStatsAsync(int userId);
     }
 }

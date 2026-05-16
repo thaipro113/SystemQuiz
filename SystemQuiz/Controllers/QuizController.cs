@@ -23,7 +23,6 @@ namespace SystemQuiz.Controllers
         {
             try 
             {
-                // Lấy claim có tên là "UserId", nếu không có thì lấy claim NameIdentifier và kiểm tra xem nó có phải là số không
                 var userIdClaim = User.FindFirst("UserId") 
                     ?? User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier && int.TryParse(c.Value, out _));
                     
@@ -36,6 +35,50 @@ namespace SystemQuiz.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { error = ex.Message, inner = ex.InnerException?.Message });
+            }
+        }
+
+        [HttpGet("trending")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetTrendingQuizzes()
+        {
+            try
+            {
+                var trending = await _quizService.GetTrendingQuizzesAsync();
+                return Ok(trending);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        [HttpGet("results/{userId}")]
+        public async Task<IActionResult> GetUserResults(int userId)
+        {
+            try
+            {
+                var results = await _quizService.GetUserResultsAsync(userId);
+                return Ok(results);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        [HttpGet("leaderboard")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetLeaderboard(int limit = 10)
+        {
+            try
+            {
+                var leaderboard = await _quizService.GetLeaderboardAsync(limit);
+                return Ok(leaderboard);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
             }
         }
     }

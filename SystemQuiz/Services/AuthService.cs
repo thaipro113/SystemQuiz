@@ -33,7 +33,30 @@ namespace SystemQuiz.Services
             {
                 Token = token,
                 UserName = user.UserName,
-                Role = user.Role
+                Role = user.Role,
+                UserId = user.Id,
+                TotalXP = user.TotalXP,
+                CurrentStreak = user.CurrentStreak,
+                CompletedQuizzes = user.CompletedQuizzes,
+                GlobalRank = user.GlobalRank
+            };
+        }
+
+        public async Task<UserStatsDto> GetUserStatsAsync(int userId)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+                return null;
+
+            return new UserStatsDto
+            {
+                UserId = user.Id,
+                UserName = user.UserName,
+                Name = user.Name,
+                TotalXP = user.TotalXP,
+                CurrentStreak = user.CurrentStreak,
+                CompletedQuizzes = user.CompletedQuizzes,
+                GlobalRank = user.GlobalRank
             };
         }
 

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SystemQuiz.DTOs;
 using SystemQuiz.Services;
@@ -29,6 +30,22 @@ namespace SystemQuiz.Controllers
             var result = await _authService.LoginAsync(loginDto);
             if (result == null) return Unauthorized("Invalid credentials.");
             return Ok(result);
+        }
+
+        [HttpGet("stats/{userId}")]
+        [Authorize]
+        public async Task<IActionResult> GetUserStats(int userId)
+        {
+            try
+            {
+                var stats = await _authService.GetUserStatsAsync(userId);
+                if (stats == null) return NotFound("User not found.");
+                return Ok(stats);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
         }
     }
 }

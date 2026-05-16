@@ -1,61 +1,76 @@
 import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Auth from './components/Auth';
-import Quiz from './components/Quiz';
+import Home from './components/Home';
+import QuizTaking from './components/QuizTaking';
+import QuizHistory from './components/QuizHistory';
 import AdminDashboard from './components/AdminDashboard';
 import './index.css';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userName, setUserName] = useState('');
   const [role, setRole] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = () => {
     const token = localStorage.getItem('token');
-    const user = localStorage.getItem('userName');
     const userRole = localStorage.getItem('role');
     if (token) {
       setIsAuthenticated(true);
-      setUserName(user);
       setRole(userRole);
+    } else {
+      setIsAuthenticated(false);
+      setRole('');
     }
-  }, []);
+    setIsLoading(false);
+  };
+
+  const handleLoginSuccess = () => {
+    checkAuth();
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userName');
     localStorage.removeItem('role');
-    setIsAuthenticated(false);
-    setUserName('');
-    setRole('');
+    localStorage.removeItem('userId');
+    checkAuth();
   };
 
-  return (
-    <>
-      <nav className="navbar">
-        <div className="logo">SystemQuiz PRO</div>
-        {isAuthenticated && (
-          <div className="user-info">
-            <span style={{background: role === 'Admin' ? 'var(--danger)' : 'var(--primary)', padding: '0.2rem 0.5rem', borderRadius: '0.25rem', fontSize: '0.8rem', color: 'white'}}>
-              {role || 'User'}
-            </span>
-            <span>Welcome, {userName}!</span>
-            <button className="logout-btn" onClick={handleLogout}>Logout</button>
-          </div>
-        )}
-      </nav>
+  if (isLoading) {
+    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--bg-color)', color: 'var(--primary)' }}>Đang tải...</div>;
+  }
 
-      {!isAuthenticated ? (
-        <Auth onLoginSuccess={() => {
-          setIsAuthenticated(true);
-          setUserName(localStorage.getItem('userName'));
-          setRole(localStorage.getItem('role'));
-        }} />
-      ) : role === 'Admin' ? (
-        <AdminDashboard />
-      ) : (
-        <Quiz />
-      )}
-    </>
+  return (
+    <BrowserRouter>
+      <Routes>
+        {!isAuthenticated ? (
+          // If not logged in, show Auth component for all routes
+          <Route path="*" element={<Auth onLoginSuccess={handleLoginSuccess} />} />
+        ) : role === 'Admin' ? (
+          // If Admin, show Admin Dashboard and restrict other frontend pages
+          <>
+            <Route path="/admin" element={<AdminDashboard handleLogout={handleLogout} />} />
+            <Route path="*" element={<Navigate to="/admin" replace />} />
+          </>
+        ) : (
+          // If normal user, show the main app
+          <>
+            <Route path="/" element={<Home />} />
+            <Route path="/quiz" element={<QuizTaking />} />
+            <Route path="/take-quiz/:id" element={<QuizTaking />} />
+            <Route path="/history" element={<QuizHistory />} />
+            
+            {/* Redirect any other unknown routes to Home */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </>
+        )}
+      </Routes>
+    </BrowserRouter>
   );
 }
 

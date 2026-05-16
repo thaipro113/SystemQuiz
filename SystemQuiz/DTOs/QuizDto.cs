@@ -25,4 +25,21 @@ namespace SystemQuiz.DTOs
         public string SelectedAnswerContent { get; set; }
         public bool IsCorrect { get; set; }
     }
+
+    public class QuizDisplayDto
+    {
+        public string Topic { get; set; }
+        public int QuestionCount { get; set; }
+        public string Difficulty { get; set; }
+        public int EstimatedTime { get; set; }
+        public int PlayersCount { get; set; }
+    }
+
+    public class LeaderboardEntryDto
+    {
+        public int Rank { get; set; }
+        public string UserName { get; set; }
+        public string Name { get; set; }
+        public int TotalXP { get; set; }
+    }
 }
