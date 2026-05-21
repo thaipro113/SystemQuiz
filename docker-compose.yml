@@ -1,0 +1,81 @@
+version: '3.8'
+
+services:
+  # ── SQL Server Database ──────────────────────────────────
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: systemquiz-db
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${DB_PASSWORD:-Quiz@123456!}
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    networks:
+      - quiz-net
+    healthcheck:
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd",
+             "-S", "localhost",
+             "-U", "sa",
+             "-P", "${DB_PASSWORD:-Quiz@123456!}",
+             "-C", "-Q", "SELECT 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # ── Backend ASP.NET Core 8 ───────────────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: SystemQuiz/Dockerfile
+    container_name: systemquiz-backend
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=${DB_NAME:-QuizDb};User Id=sa;Password=${DB_PASSWORD:-Quiz@123456!};TrustServerCertificate=true;
+      - Jwt__Key=${JWT_KEY:-YourSuperSecretKeyHereChangeInProduction!}
+      - Jwt__Issuer=${JWT_ISSUER:-QuizAPI}
+      - Jwt__Audience=${JWT_AUDIENCE:-QuizAPIUsers}
+    ports:
+      - "8080:8080"
+    networks:
+      - quiz-net
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ── Frontend React + Nginx ───────────────────────────────
+  frontend:
+    build:
+      context: ./quiz-frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=${VITE_API_URL:-http://localhost:8080}
+    container_name: systemquiz-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    networks:
+      - quiz-net
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  sqlserver-data:
+    driver: local
+
+networks:
+  quiz-net:
+    driver: bridge
