@@ -2,7 +2,6 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 export default function Navbar({ title, timer }) {
   const location = useLocation();
-  const navigate = useNavigate();
   const isQuizTaking = location.pathname.includes('/take-quiz');
   const userName = localStorage.getItem('userName') || 'User';
 
