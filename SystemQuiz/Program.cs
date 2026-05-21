@@ -99,7 +99,7 @@ namespace SystemQuiz
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
+            // app.UseHttpsRedirection();
 
             app.UseCors("AllowAll");
 
@@ -112,6 +112,80 @@ namespace SystemQuiz
 
             // Map Health Check endpoints
             app.MapHealthChecks("/api/health");
+
+            // Automatically apply database migrations and seed data on startup
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<QuizDbContext>();
+                db.Database.Migrate();
+
+                // Seed questions if empty
+                if (!db.Questions.Any())
+                {
+                    var q1 = new SystemQuiz.Models.Question
+                    {
+                        Content = "Ngôn ngữ lập trình (đánh dấu) nào được sử dụng chính để xây dựng cấu trúc nội dung của một trang web?",
+                        Topic = "Lập trình",
+                        Answers = new List<SystemQuiz.Models.Answer>
+                        {
+                            new SystemQuiz.Models.Answer { Content = "HTML", IsCorrect = true },
+                            new SystemQuiz.Models.Answer { Content = "CSS", IsCorrect = false },
+                            new SystemQuiz.Models.Answer { Content = "JavaScript", IsCorrect = false },
+                            new SystemQuiz.Models.Answer { Content = "C++", IsCorrect = false }
+                        }
+                    };
+                    var q2 = new SystemQuiz.Models.Question
+                    {
+                        Content = "Chiến thắng lịch sử Điện Biên Phủ của quân và dân Việt Nam diễn ra vào năm nào?",
+                        Topic = "Lịch sử",
+                        Answers = new List<SystemQuiz.Models.Answer>
+                        {
+                            new SystemQuiz.Models.Answer { Content = "1954", IsCorrect = true },
+                            new SystemQuiz.Models.Answer { Content = "1945", IsCorrect = false },
+                            new SystemQuiz.Models.Answer { Content = "1975", IsCorrect = false },
+                            new SystemQuiz.Models.Answer { Content = "1930", IsCorrect = false }
+                        }
+                    };
+                    var q3 = new SystemQuiz.Models.Question
+                    {
+                        Content = "Ngọn núi nào cao nhất Việt Nam và được mệnh danh là \"Nóc nhà Đông Dương\"?",
+                        Topic = "Địa lý",
+                        Answers = new List<SystemQuiz.Models.Answer>
+                        {
+                            new SystemQuiz.Models.Answer { Content = "Fansipan", IsCorrect = true },
+                            new SystemQuiz.Models.Answer { Content = "Tây Côn Lĩnh", IsCorrect = false },
+                            new SystemQuiz.Models.Answer { Content = "Chứa Chan", IsCorrect = false },
+                            new SystemQuiz.Models.Answer { Content = "Ba Vì", IsCorrect = false }
+                        }
+                    };
+                    var q4 = new SystemQuiz.Models.Question
+                    {
+                        Content = "Hành tinh nào nằm gần Mặt Trời nhất trong Hệ Mặt Trời?",
+                        Topic = "Khoa học",
+                        Answers = new List<SystemQuiz.Models.Answer>
+                        {
+                            new SystemQuiz.Models.Answer { Content = "Sao Thủy", IsCorrect = true },
+                            new SystemQuiz.Models.Answer { Content = "Sao Kim", IsCorrect = false },
+                            new SystemQuiz.Models.Answer { Content = "Trái Đất", IsCorrect = false },
+                            new SystemQuiz.Models.Answer { Content = "Sao Hỏa", IsCorrect = false }
+                        }
+                    };
+                    var q5 = new SystemQuiz.Models.Question
+                    {
+                        Content = "Trong ngôn ngữ JavaScript, từ khóa nào dùng để khai báo một biến có phạm vi khối (block-scope) và có thể gán lại giá trị?",
+                        Topic = "Lập trình",
+                        Answers = new List<SystemQuiz.Models.Answer>
+                        {
+                            new SystemQuiz.Models.Answer { Content = "let", IsCorrect = true },
+                            new SystemQuiz.Models.Answer { Content = "var", IsCorrect = false },
+                            new SystemQuiz.Models.Answer { Content = "const", IsCorrect = false },
+                            new SystemQuiz.Models.Answer { Content = "define", IsCorrect = false }
+                        }
+                    };
+                    db.Questions.AddRange(q1, q2, q3, q4, q5);
+                    db.SaveChanges();
+                }
+            }
 
             app.Run();
         }
