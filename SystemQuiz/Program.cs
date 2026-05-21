@@ -34,8 +34,16 @@ namespace SystemQuiz
         };
     });
             builder.Services.AddDbContext<QuizDbContext>(options =>
-    options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseSqlServer(
+                    builder.Configuration.GetConnectionString("DefaultConnection"),
+                    sqlOptions =>
+                    {
+                        sqlOptions.EnableRetryOnFailure(
+                            maxRetryCount: 3,
+                            maxRetryDelay: TimeSpan.FromSeconds(5),
+                            errorNumbersToAdd: null);
+                        sqlOptions.CommandTimeout(60);
+                    }));
             builder.Services.AddAuthorization();
             builder.Services.AddControllers();
             builder.Services.AddScoped<SystemQuiz.Services.IAuthService, SystemQuiz.Services.AuthService>();
@@ -92,11 +100,77 @@ namespace SystemQuiz
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // Exception Handler - Simple approach
             if (app.Environment.IsDevelopment())
             {
+                app.UseExceptionHandler(exceptionHandlerApp =>
+                {
+                    exceptionHandlerApp.Run(async context =>
+                    {
+                        var exceptionHandlerPathFeature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerPathFeature>();
+                        var exception = exceptionHandlerPathFeature?.Error;
+
+                        if (exception != null)
+                        {
+                            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+                            logger.LogError(exception, "An unhandled exception occurred: {Message}", exception.Message);
+
+                            context.Response.StatusCode = GetStatusCodeFromException(exception);
+                            context.Response.ContentType = "application/json";
+
+                            var response = new
+                            {
+                                error = new
+                                {
+                                    message = exception.Message,
+                                    type = exception.GetType().Name,
+                                    stackTrace = exception.StackTrace,
+                                    innerException = exception.InnerException?.Message,
+                                    timestamp = DateTime.UtcNow
+                                }
+                            };
+
+                            await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(response, new System.Text.Json.JsonSerializerOptions
+                            {
+                                PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+                                WriteIndented = true
+                            }));
+                        }
+                    });
+                });
                 app.UseSwagger();
                 app.UseSwaggerUI();
+            }
+            else
+            {
+                app.UseExceptionHandler(exceptionHandlerApp =>
+                {
+                    exceptionHandlerApp.Run(async context =>
+                    {
+                        var exceptionHandlerPathFeature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerPathFeature>();
+                        var exception = exceptionHandlerPathFeature?.Error;
+
+                        if (exception != null)
+                        {
+                            var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+                            logger.LogError(exception, "An unhandled exception occurred");
+
+                            context.Response.StatusCode = GetStatusCodeFromException(exception);
+                            context.Response.ContentType = "application/json";
+
+                            var response = new
+                            {
+                                error = new
+                                {
+                                    message = "An error occurred while processing your request.",
+                                    timestamp = DateTime.UtcNow
+                                }
+                            };
+
+                            await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(response));
+                        }
+                    });
+                });
             }
 
             app.UseHttpsRedirection();
@@ -114,6 +188,18 @@ namespace SystemQuiz
             app.MapHealthChecks("/api/health");
 
             app.Run();
+        }
+
+        private static int GetStatusCodeFromException(Exception exception)
+        {
+            return exception switch
+            {
+                ArgumentNullException => 400,
+                ArgumentException => 400,
+                UnauthorizedAccessException => 401,
+                KeyNotFoundException => 404,
+                _ => 500
+            };
         }
     }
 }

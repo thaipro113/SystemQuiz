@@ -5,6 +5,7 @@ import Home from './components/Home';
 import QuizTaking from './components/QuizTaking';
 import QuizHistory from './components/QuizHistory';
 import AdminDashboard from './components/AdminDashboard';
+import UserProfile from './components/UserProfile';
 import './index.css';
 
 function App() {
@@ -64,6 +65,7 @@ function App() {
             <Route path="/quiz" element={<QuizTaking />} />
             <Route path="/take-quiz/:id" element={<QuizTaking />} />
             <Route path="/history" element={<QuizHistory />} />
+            <Route path="/profile" element={<UserProfile />} />
             
             {/* Redirect any other unknown routes to Home */}
             <Route path="*" element={<Navigate to="/" replace />} />

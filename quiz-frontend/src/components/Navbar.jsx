@@ -61,6 +61,9 @@ export default function Navbar({ title, timer }) {
               <div style={{padding: '0.5rem', borderBottom: '1px solid var(--border)', marginBottom: '0.5rem'}}>
                 <strong>{userName}</strong>
               </div>
+              <button onClick={() => navigate('/profile')} style={{width: '100%', textAlign: 'left', padding: '0.5rem', background: 'none', border: 'none', color: 'var(--text-color)', cursor: 'pointer', borderRadius: '0.25rem', marginBottom: '0.25rem'}} onMouseOver={e => e.target.style.background = 'var(--bg-color)'} onMouseOut={e => e.target.style.background = 'none'}>
+                Hồ sơ cá nhân
+              </button>
               <button onClick={handleLogout} style={{width: '100%', textAlign: 'left', padding: '0.5rem', background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', borderRadius: '0.25rem'}} onMouseOver={e => e.target.style.background = '#fee2e2'} onMouseOut={e => e.target.style.background = 'none'}>
                 Đăng xuất
               </button>
