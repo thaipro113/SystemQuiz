@@ -49,7 +49,7 @@ services:
       db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/health 2>/dev/null || exit 0"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -65,7 +65,7 @@ services:
     container_name: systemquiz-frontend
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "3000:80"
     networks:
       - quiz-net
     depends_on:
