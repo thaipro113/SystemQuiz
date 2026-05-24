@@ -23,63 +23,64 @@ export default function AdminDashboard({ handleLogout, userName }) {
   const [newQuestion, setNewQuestion] = useState(initialQuestionState);
   const [editingId, setEditingId] = useState(null);
 
-  useEffect(() => {
-    fetchQuestions();
-    fetchStats();
-  }, []);
-
-  useEffect(() => {
-    const currentTopics = [...new Set(questions.map(q => q.topic || 'General'))];
-
-    setCollapsedTopics(prev => {
-      const updated = { ...prev };
-
-      currentTopics.forEach(topic => {
-        if (!(topic in updated)) {
-          updated[topic] = true;
-        }
-      });
-
-      Object.keys(updated).forEach(topic => {
-        if (!currentTopics.includes(topic)) {
-          delete updated[topic];
-        }
-      });
-
-      return updated;
-    });
-  }, [questions]);
-
-  const toggleTopic = (topicName) => {
-    setCollapsedTopics(prev => ({
-      ...prev,
-      [topicName]: !prev[topicName]
-    }));
-  };
-
   const fetchQuestions = async () => {
     try {
       const res = await api.get('/questions');
-      setQuestions(res.data);
+      const data = res.data;
+      setQuestions(data);
+
+      const currentTopics = [...new Set(data.map(q => q.topic || 'General'))];
+      setCollapsedTopics(prev => {
+        const updated = { ...prev };
+        currentTopics.forEach(topic => {
+          if (!(topic in updated)) {
+            updated[topic] = true;
+          }
+        });
+        Object.keys(updated).forEach(topic => {
+          if (!currentTopics.includes(topic)) {
+            delete updated[topic];
+          }
+        });
+        return updated;
+      });
+
       setLoading(false);
+      return data;
     } catch (err) {
       console.error(err);
       setLoading(false);
+      return [];
     }
   };
 
-  const fetchStats = async () => {
+  const fetchStats = async (questionsLength) => {
     try {
       // Mock stats for now - in a real app, fetch from backend
       setStats({
         totalUsers: 1200,
-        totalQuizzes: questions.length,
+        totalQuizzes: questionsLength,
         activeUsers: 84,
         completionRate: 92
       });
     } catch (err) {
       console.error('Failed to fetch stats:', err);
     }
+  };
+
+  useEffect(() => {
+    const init = async () => {
+      const data = await fetchQuestions();
+      await fetchStats(data.length);
+    };
+    init();
+  }, []);
+
+  const toggleTopic = (topicName) => {
+    setCollapsedTopics(prev => ({
+      ...prev,
+      [topicName]: !prev[topicName]
+    }));
   };
 
   const handleAddSubmit = async (e, keepOpen = false) => {

@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from './Navbar';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../utils/api';
+
+const colorClasses = ['html', 'js', 'react', 'asp', 'sql', 'ai'];
+const getRandomColorClass = () => colorClasses[Math.floor(Math.random() * colorClasses.length)];
 
 export default function Home() {
   const [categories, setCategories] = useState([]);
@@ -44,10 +47,6 @@ export default function Home() {
 
     fetchData();
   }, []);
-
-  // Helper to assign random styling classes
-  const colorClasses = ['html', 'js', 'react', 'asp', 'sql', 'ai'];
-  const getRandomColorClass = () => colorClasses[Math.floor(Math.random() * colorClasses.length)];
 
   const getIconForClass = (cls, name) => {
     switch (cls) {

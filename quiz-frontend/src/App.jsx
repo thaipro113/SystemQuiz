@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Auth from './components/Auth';
 import Home from './components/Home';
@@ -8,13 +8,8 @@ import AdminDashboard from './components/AdminDashboard';
 import './index.css';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [role, setRole] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    checkAuth();
-  }, []);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => !!localStorage.getItem('token'));
+  const [role, setRole] = useState(() => localStorage.getItem('role') || '');
 
   const checkAuth = () => {
     const token = localStorage.getItem('token');
@@ -26,7 +21,6 @@ function App() {
       setIsAuthenticated(false);
       setRole('');
     }
-    setIsLoading(false);
   };
 
   const handleLoginSuccess = () => {
@@ -40,10 +34,6 @@ function App() {
     localStorage.removeItem('userId');
     checkAuth();
   };
-
-  if (isLoading) {
-    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'var(--bg-color)', color: 'var(--primary)' }}>Đang tải...</div>;
-  }
 
   return (
     <BrowserRouter>
