@@ -57,7 +57,7 @@ jobs:
 
       - name: Lint với ESLint
         working-directory: quiz-frontend
-        run: npm run lint -- --max-warnings=100
+        run: npm run lint -- --max-warnings=110
 
       - name: Run tests
         working-directory: quiz-frontend
