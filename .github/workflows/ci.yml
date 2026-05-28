@@ -36,7 +36,7 @@ jobs:
           Jwt__Audience: "QuizAPIUsers"
 
   # ── Job 2: Frontend React + Vite ────────────────────────
-frontend:
+  frontend:    # ✅ đã thêm 2 space
     name: Frontend (React + Vite)
     runs-on: ubuntu-latest
 
@@ -44,7 +44,7 @@ frontend:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -59,7 +59,7 @@ frontend:
         working-directory: quiz-frontend
         run: npm run lint -- --max-warnings=100
 
-      - name: Run tests      
+      - name: Run tests
         working-directory: quiz-frontend
         run: npm test -- --run
         continue-on-error: true
@@ -69,6 +69,7 @@ frontend:
         run: npm run build
         env:
           VITE_API_URL: ${{ secrets.VITE_API_URL || 'http://localhost:8080' }}
+
   # ── Job 3: Docker Build ──────────────────────────────────
   docker:
     name: Docker Build
