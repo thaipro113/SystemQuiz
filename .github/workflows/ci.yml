@@ -36,7 +36,7 @@ jobs:
           Jwt__Audience: "QuizAPIUsers"
 
   # ── Job 2: Frontend React + Vite ────────────────────────
-  frontend:    # ✅ đã thêm 2 space
+  frontend:  
     name: Frontend (React + Vite)
     runs-on: ubuntu-latest
 
