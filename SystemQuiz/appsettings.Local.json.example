@@ -1,10 +1,10 @@
 {
-  "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost,1433;Database=QuizDb;User Id=sa;Password=Quiz@123456!;TrustServerCertificate=true;"
-  },
   "Jwt": {
-    "Key": "LocalDevelopmentSecretKeyMinimum32Characters!",
+    "Key": "SuperSecretKey123456789012345678901234567890",
     "Issuer": "QuizAPI",
     "Audience": "QuizAPIUsers"
+  },
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=QuizDb;Trusted_Connection=true;TrustServerCertificate=true;"
   }
 }
